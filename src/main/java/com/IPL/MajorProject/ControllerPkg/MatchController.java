@@ -5,6 +5,7 @@ import com.IPL.MajorProject.ServicePkg.MatchServices;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,27 +13,20 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 public class MatchController {
 
     @Autowired
     MatchServices matchService;
 
-    @GetMapping("/season/{season}")
-    public ResponseEntity<List<MatchEntity>> getMatchesBySeason(@PathVariable Long season) {
-        List<MatchEntity> matches = matchService.getAllMatchesBySeason(season);
-        if (matches.isEmpty()) {
-            return ResponseEntity.noContent().build(); // or return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(matches);
+    @GetMapping("/teams")
+    public List<String> getUniqueTeams() {
+        return matchService.getAllUniqueTeams();
     }
 
-    @GetMapping("team/{teamName}")
-    public ResponseEntity<List<MatchEntity>> getMatchesByTeam(@PathVariable String teamName) {
-        List<MatchEntity> matches = matchService.getAllMatchesByTeam(teamName);
-        if (matches.isEmpty()) {
-            return ResponseEntity.noContent().build(); // or return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(matches);
+    @GetMapping("/seasons")
+    public List<Integer> getUniqueSeasons() {
+        return matchService.getAllUniqueSeasons();
     }
 
     @GetMapping("/season/{season}/team/{teamName}")
@@ -44,4 +38,15 @@ public class MatchController {
         return ResponseEntity.ok(matches);
     }
 
+    @GetMapping("/season/{season}/team/{teamName}/winPercentage")
+    public ResponseEntity<Double> getWinPercentage(@PathVariable Long season, @PathVariable String teamName) {
+        double winPercentage = matchService.calculateWinPercentage(season, teamName);
+        return ResponseEntity.ok(winPercentage);
+    }
+
+    @GetMapping("/season/{season}/team/{teamName}/lossPercentage")
+    public ResponseEntity<Double> getLossPercentage(@PathVariable Long season, @PathVariable String teamName) {
+        double lossPercentage = matchService.calculateLossPercentage(season, teamName);
+        return ResponseEntity.ok(lossPercentage);
+    }
 }
